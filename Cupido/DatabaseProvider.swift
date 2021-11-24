@@ -7,6 +7,7 @@
 
 import Foundation
 import Firebase
+import UIKit
 
 
 struct DatabaseProvider {
@@ -26,5 +27,21 @@ struct DatabaseProvider {
                               "phone" : phone])
             completion()
         }
+    }
+    
+    func downloadTriggerImage(uid: String, completion: @escaping (Result<URL?, Error>) -> Void) {
+        //TODO: spinner
+        //TODO: обработка если фотография уже загружена
+        let storage = Storage.storage()
+        let userRef = storage.reference().child(uid);
+        let originalPhotoRef = userRef.child("User/triggerImage.jpg")
+        
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = dir.appendingPathComponent(uid + "_trigger")
+            let _ = originalPhotoRef.write(toFile: fileURL) {url, error in
+                if error != nil { completion(.failure(error!)) }
+                else { completion(.success(url)) }
+            }
+        }        
     }
 }

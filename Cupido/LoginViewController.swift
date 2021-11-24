@@ -30,6 +30,7 @@ class LoginViewController: UIViewController {
         }
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if error != nil {
+                //TODO: обработка ошибки как в экране регистрации
                 return
             }
             

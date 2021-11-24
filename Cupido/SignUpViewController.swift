@@ -29,6 +29,7 @@ class SignUpViewController: UIViewController {
         
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if error != nil {
+                //TODO: перенести куда-нибудь нафиг отсюда
                 if let errorCode = AuthErrorCode.init(rawValue: error!._code) {
                     var message  = "";
                     switch errorCode {
@@ -53,7 +54,7 @@ class SignUpViewController: UIViewController {
             let databaseProvider = DatabaseProvider()
             databaseProvider.writeUser(name: firstName, surname: self.secondNameTextField.text ?? "", email: email, phone: self.phoneTextField.text ?? "", uid: authResult?.user.uid ?? "") {
                 DispatchQueue.main.async { [weak self] in
-                    //self?.performSegue(withIdentifier: "showScanVC", sender: nil)
+                    self?.performSegue(withIdentifier: "showScanVCfromSignup", sender: nil)
                 }
             }
         }
