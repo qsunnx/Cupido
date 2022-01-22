@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+
+enum ImageType {
+    case trigger
+    case media
+}

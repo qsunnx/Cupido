@@ -53,11 +53,21 @@ class SignUpViewController: UIViewController {
             
             let databaseProvider = DatabaseProvider()
             databaseProvider.writeUser(name: firstName, surname: self.secondNameTextField.text ?? "", email: email, phone: self.phoneTextField.text ?? "", uid: authResult?.user.uid ?? "") {
+                let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
+                                            kSecAttrAccount as String: email,
+                                            kSecValueData as String: password.data(using: String.Encoding.utf8)!,
+                                            kSecAttrDescription as String: "Cupido password"]
+                let status = SecItemAdd(query as CFDictionary, nil)
+                
+                guard status == errSecSuccess else {
+                    // TODO: обработка ошибки добавления пароля
+                    return
+                }
+                
                 DispatchQueue.main.async { [weak self] in
                     self?.performSegue(withIdentifier: "showScanVCfromSignup", sender: nil)
                 }
             }
         }
     }
-    
 }

@@ -10,15 +10,15 @@ import SceneKit
 import ARKit
 import Foundation
 
-class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDelegate {
-
+class ViewController: UIViewController {
+    
     @IBOutlet var sceneView: ARSCNView!
     
     private var captureSession: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
-    
     private let databaseProvider = DatabaseProvider()
     private let configuration = ARImageTrackingConfiguration()
+    private var databaseImages: [DatabaseImage] = [DatabaseImage]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -89,9 +89,18 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         // Pause the view's session
         sceneView.session.pause()
     }
+}
 
-    // MARK: - ARSCNViewDelegate
-    
+extension ViewController {
+   @MainActor private func startRender(trackingImages: Set<ARReferenceImage>) {
+        self.configuration.trackingImages = trackingImages
+        self.previewLayer.removeFromSuperlayer()
+        self.sceneView.session.run(self.configuration, options: [.resetTracking, .removeExistingAnchors])
+    }
+}
+
+// MARK: - ARSCNViewDelegate
+extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDelegate {
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
         
@@ -108,75 +117,64 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
-
-
+        
+        
     }
     
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-            guard let imageAnchor = anchor as? ARImageAnchor else { return nil }
-
-            // create a plane at the exact physical width and height of our reference image
-            let plane = SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height)
-
-            // make the plane have a transparent blue color
-            plane.firstMaterial?.diffuse.contents = UIColor.blue
-
-            // wrap the plane in a node and rotate it so it's facing us
-            let planeNode = SCNNode(geometry: plane)
-            planeNode.eulerAngles.x = -.pi / 2
-
-            // now wrap that in another node and send it back
-            let node = SCNNode()
-            node.addChildNode(planeNode)
-            return node
+        guard let imageAnchor = anchor as? ARImageAnchor else { return nil }
+        
+        let plane = SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height)
+        plane.firstMaterial?.diffuse.contents = UIColor.blue
+        
+        let planeNode = SCNNode(geometry: plane)
+        planeNode.eulerAngles.x = -.pi / 2
+        
+        
+        let material = SCNMaterial()
+        material.isDoubleSided = true
+        
+        DispatchQueue.main.async {
+            let imageView = UIImageView(image: self.databaseImages[0].image)
+            material.diffuse.contents = imageView
+            
+            planeNode.geometry?.materials = [material]
+        }
+        
+        let node = SCNNode()
+        node.addChildNode(planeNode)
+        return node
     }
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-            captureSession.stopRunning()
-
-            if let metadataObject = metadataObjects.first {
-                guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
-                guard let stringValue = readableObject.stringValue else { return }
-                
-                AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
-                
-                databaseProvider.downloadTriggerImage(uid: stringValue) { [unowned self] result in
-                    var imageURL: URL
-                    var triggerImage: UIImage?
-                    
-                    // TODO: обработка ошибки получения URL
-                    switch result {
-                    case .failure(let error):
-                        print(error.localizedDescription)
-                        return
-                    case .success(let url):
-                        if url == nil {
-                            // TODO: обработка ошибки
-                            return
-                        }
-                        imageURL = url!
-                    }
-                    
-                    do {
-                        let imageData = try Data(contentsOf: imageURL)
-                        triggerImage = UIImage(data: imageData)
-                    } catch {
-                        // TODO: обработка ошибки
-                    }
-                    
-                    guard let triggerImage = triggerImage else {
-                        return
-                    }
-
-                    let referenceImage = ARReferenceImage(triggerImage.cgImage!, orientation: .up, physicalWidth: 0.21)
-                    var ARtriggerImages = Set<ARReferenceImage>()
-                    ARtriggerImages.insert(referenceImage)
-                    self.configuration.trackingImages = ARtriggerImages
-                    
-                    DispatchQueue.main.async {
-                        self.sceneView.session.run(self.configuration, options: [.resetTracking, .removeExistingAnchors])
-                    }
+        captureSession.stopRunning()
+        
+        if let metadataObject = metadataObjects.first {
+            guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
+            guard let uid = readableObject.stringValue else { return }
+            
+            AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
+            
+            Task {
+                do {
+                    let _databaseImages = try await databaseProvider.getDatabaseImages(uid: uid)
+                    databaseImages = _databaseImages
+                } catch {
+                    // TODO: сообщение об ошибке
                 }
+                
+                let referenceImages = databaseImages
+                    .filter({ $0.imageType == .trigger })
+                    .map({ ARReferenceImage($0.image.cgImage!, orientation: .up, physicalWidth: 0.1) })
+                self.databaseImages
+                var ARtriggerImages = Set<ARReferenceImage>()
+                
+                for referenceImage in referenceImages {
+                    ARtriggerImages.insert(referenceImage)
+                }
+                
+                startRender(trackingImages: ARtriggerImages)
             }
         }
+    }
 }

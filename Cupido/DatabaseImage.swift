@@ -6,3 +6,9 @@
 //
 
 import Foundation
+import UIKit
+
+struct DatabaseImage {
+    var image: UIImage
+    var imageType: ImageType
+}

@@ -10,14 +10,17 @@ import Firebase
 
 class LoginViewController: UIViewController {
     
-    @IBOutlet private weak var loginLabel: UILabel!
-    @IBOutlet private weak var emailTextField: UITextField!
-    @IBOutlet private weak var passwordTextField: UITextField!
-    @IBOutlet private weak var forgotPasswordButton: UIButton!
-    @IBOutlet private weak var loginButton: UIButton!
-
+    @IBOutlet weak var loginLabel: UILabel!
+    @IBOutlet weak var emailTextField: UITextField!
+    @IBOutlet weak var passwordTextField: UITextField!
+    @IBOutlet weak var forgotPasswordButton: UIButton!
+    @IBOutlet weak var loginButton: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        passwordTextField.delegate = self
+        emailTextField.delegate.self
     }
     
     @IBAction func logInButtonPressed(_ sender: Any) {
@@ -41,5 +44,15 @@ class LoginViewController: UIViewController {
     }
     
     @IBAction func forgotPasswordButtonPressed(_ sender: Any) {
+    }
+}
+
+extension LoginViewController: UITextFieldDelegate {
+    
+}
+
+extension LoginViewController {
+    var userPassword: String {
+        return ""
     }
 }

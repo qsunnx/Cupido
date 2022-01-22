@@ -16,11 +16,12 @@
 		7A4C46CD26E25381003C0E72 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7A4C46CC26E25381003C0E72 /* GoogleService-Info.plist */; };
 		7A8D1F9327024AAC000BD9BF /* QRCodeScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A8D1F9227024AAC000BD9BF /* QRCodeScannerViewController.swift */; };
 		7AC2E11E26BC7647002439A5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC2E11D26BC7647002439A5 /* AppDelegate.swift */; };
-		7AC2E12026BC7647002439A5 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 7AC2E11F26BC7647002439A5 /* art.scnassets */; };
 		7AC2E12226BC7647002439A5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC2E12126BC7647002439A5 /* ViewController.swift */; };
 		7AC2E12526BC7647002439A5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7AC2E12326BC7647002439A5 /* Main.storyboard */; };
 		7AC2E12726BC7648002439A5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7AC2E12626BC7648002439A5 /* Assets.xcassets */; };
 		7AC2E12A26BC7648002439A5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7AC2E12826BC7648002439A5 /* LaunchScreen.storyboard */; };
+		7AC9CC51277CE84300751A67 /* ImageType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC9CC50277CE84300751A67 /* ImageType.swift */; };
+		7AC9CC53277CE87000751A67 /* DatabaseImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC9CC52277CE87000751A67 /* DatabaseImage.swift */; };
 		7AEDE39F26E6087400E32D94 /* DatabaseProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AEDE39E26E6087400E32D94 /* DatabaseProvider.swift */; };
 /* End PBXBuildFile section */
 
@@ -31,12 +32,13 @@
 		7A8D1F9227024AAC000BD9BF /* QRCodeScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScannerViewController.swift; sourceTree = "<group>"; };
 		7AC2E11A26BC7647002439A5 /* Cupido.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cupido.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AC2E11D26BC7647002439A5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		7AC2E11F26BC7647002439A5 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
 		7AC2E12126BC7647002439A5 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		7AC2E12426BC7647002439A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		7AC2E12626BC7648002439A5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7AC2E12926BC7648002439A5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7AC2E12B26BC7648002439A5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		7AC9CC50277CE84300751A67 /* ImageType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageType.swift; sourceTree = "<group>"; };
+		7AC9CC52277CE87000751A67 /* DatabaseImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseImage.swift; sourceTree = "<group>"; };
 		7AEDE39E26E6087400E32D94 /* DatabaseProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,12 +78,13 @@
 			isa = PBXGroup;
 			children = (
 				7AEDE39E26E6087400E32D94 /* DatabaseProvider.swift */,
+				7AC9CC52277CE87000751A67 /* DatabaseImage.swift */,
+				7AC9CC50277CE84300751A67 /* ImageType.swift */,
 				7A4C46C826E22F33003C0E72 /* LoginViewController.swift */,
 				7A4C46CA26E23E09003C0E72 /* SignUpViewController.swift */,
 				7A8D1F9227024AAC000BD9BF /* QRCodeScannerViewController.swift */,
 				7AC2E12126BC7647002439A5 /* ViewController.swift */,
 				7AC2E11D26BC7647002439A5 /* AppDelegate.swift */,
-				7AC2E11F26BC7647002439A5 /* art.scnassets */,
 				7AC2E12326BC7647002439A5 /* Main.storyboard */,
 				7AC2E12626BC7648002439A5 /* Assets.xcassets */,
 				7AC2E12826BC7648002439A5 /* LaunchScreen.storyboard */,
@@ -156,7 +159,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7AC2E12026BC7647002439A5 /* art.scnassets in Resources */,
 				7AC2E12A26BC7648002439A5 /* LaunchScreen.storyboard in Resources */,
 				7A4C46CD26E25381003C0E72 /* GoogleService-Info.plist in Resources */,
 				7AC2E12726BC7648002439A5 /* Assets.xcassets in Resources */,
@@ -175,7 +177,9 @@
 				7AC2E12226BC7647002439A5 /* ViewController.swift in Sources */,
 				7A4C46CB26E23E09003C0E72 /* SignUpViewController.swift in Sources */,
 				7AEDE39F26E6087400E32D94 /* DatabaseProvider.swift in Sources */,
+				7AC9CC51277CE84300751A67 /* ImageType.swift in Sources */,
 				7AC2E11E26BC7647002439A5 /* AppDelegate.swift in Sources */,
+				7AC9CC53277CE87000751A67 /* DatabaseImage.swift in Sources */,
 				7A8D1F9327024AAC000BD9BF /* QRCodeScannerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -253,7 +257,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -308,7 +312,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -323,6 +327,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = QDFPF3A92Y;
 				INFOPLIST_FILE = Cupido/Info.plist;
@@ -330,8 +335,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_CODE_SIGN_FLAGS[sdk=*]" = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = com.qsunnx.Cupido;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
@@ -342,6 +349,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = QDFPF3A92Y;
 				INFOPLIST_FILE = Cupido/Info.plist;
@@ -349,8 +357,10 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				"OTHER_CODE_SIGN_FLAGS[sdk=*]" = "--deep";
 				PRODUCT_BUNDLE_IDENTIFIER = com.qsunnx.Cupido;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
