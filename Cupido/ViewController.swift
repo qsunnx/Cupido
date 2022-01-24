@@ -13,12 +13,17 @@ import Foundation
 class ViewController: UIViewController {
     
     @IBOutlet var sceneView: ARSCNView!
+    @IBOutlet var nextButton: UIButton!
     
     private var captureSession: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
     private let databaseProvider = DatabaseProvider()
     private let configuration = ARImageTrackingConfiguration()
+    private var mediaNode: SCNNode?
     private var databaseImages: [DatabaseImage] = [DatabaseImage]()
+    private var timer: Timer?
+    private var currentMediaImageIndex = 0
+    private var operationsQueue = DispatchQueue(label: "com.cupido.MainOperationsQueue", qos: .userInitiated)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -79,15 +84,20 @@ class ViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
         configuration.worldAlignment = .camera
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
-        // Pause the view's session
         sceneView.session.pause()
+    }
+    
+    @IBAction func nextButtonPressed(_ sender: Any) {
+        guard let mediaNode = mediaNode else {
+            return
+        }
+        mediaNode.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "TestImage2")
+
     }
 }
 
@@ -96,6 +106,21 @@ extension ViewController {
         self.configuration.trackingImages = trackingImages
         self.previewLayer.removeFromSuperlayer()
         self.sceneView.session.run(self.configuration, options: [.resetTracking, .removeExistingAnchors])
+    }
+    
+    @MainActor private func startTimer() {
+        timer = Timer.scheduledTimer(timeInterval: 5.0, target: self, selector: #selector(changeMediaImage), userInfo: nil, repeats: true)
+    }
+    
+    @MainActor private func destroyTimer() {
+        timer?.invalidate()
+    }
+    
+    @objc private func changeMediaImage() {
+        // TODO: сделать потокобезопасный код - вынести в функцию с семафорами или сделать отдельную очередь для получения именно этого значения
+        DispatchQueue.main.async {
+            self.mediaNode?.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "TestImage2")
+        }
     }
 }
 
@@ -124,26 +149,32 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
         guard let imageAnchor = anchor as? ARImageAnchor else { return nil }
         
-        let plane = SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height)
-        plane.firstMaterial?.diffuse.contents = UIColor.blue
+        mediaNode = SCNNode(geometry: SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height))
+        mediaNode?.eulerAngles.x = -.pi / 2
+//        let material = SCNMaterial()
+//        material.isDoubleSided = true
+//
+//        DispatchQueue.main.async {
+//            let imageView = UIImageView(image: UIImage.init(named: "TestImage"))
+//            material.diffuse.contents = imageView
+//
+//            planeNode.geometry?.materials = [material]
+//        }
         
-        let planeNode = SCNNode(geometry: plane)
-        planeNode.eulerAngles.x = -.pi / 2
-        
-        
-        let material = SCNMaterial()
-        material.isDoubleSided = true
+//        let node = SCNNode()
+//        node.addChildNode(mediaNode)
+//        return node
         
         DispatchQueue.main.async {
-            let imageView = UIImageView(image: self.databaseImages[0].image)
-            material.diffuse.contents = imageView
-            
-            planeNode.geometry?.materials = [material]
+            // TODO: сделать потокобезопасный код - вынести в функцию с семафорами или сделать отдельную очередь для получения именно этого значения
+            let mediaItem = self.databaseImages.first{ $0.imageType == .media }
+            self.currentMediaImageIndex = self.databaseImages.firstIndex{ $0 == mediaItem }
+            self.mediaNode?.geometry?.firstMaterial?.diffuse.contents = mediaItem?.image
         }
         
-        let node = SCNNode()
-        node.addChildNode(planeNode)
-        return node
+        //  а вот тут у нас проблема! асинк!
+        
+        return mediaNode
     }
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
@@ -166,7 +197,6 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
                 let referenceImages = databaseImages
                     .filter({ $0.imageType == .trigger })
                     .map({ ARReferenceImage($0.image.cgImage!, orientation: .up, physicalWidth: 0.1) })
-                self.databaseImages
                 var ARtriggerImages = Set<ARReferenceImage>()
                 
                 for referenceImage in referenceImages {
@@ -174,6 +204,7 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
                 }
                 
                 startRender(trackingImages: ARtriggerImages)
+                startTimer()
             }
         }
     }

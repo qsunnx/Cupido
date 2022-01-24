@@ -12,3 +12,7 @@ struct DatabaseImage {
     var image: UIImage
     var imageType: ImageType
 }
+
+extension DatabaseImage: Equatable {
+    
+}

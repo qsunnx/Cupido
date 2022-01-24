@@ -76,6 +76,7 @@ struct DatabaseProvider {
         return localImages
     }
     
+    
     private func getLocalImagesURL(uid: String, imagesType: ImageType) -> [URL] {
         var localImages = [URL]()
         
