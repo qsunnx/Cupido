@@ -36,18 +36,23 @@ struct DatabaseProvider {
     func getDatabaseImages(uid: String) async throws  -> [DatabaseImage] {
         let localImages = await getLocalImages(uid: uid)
         
-        guard localImages.isEmpty else { return localImages }
+        guard localImages.isEmpty || !localImages.contains(where: {$0.imageType == .trigger}) || !localImages.contains(where: {$0.imageType == .media})
+        else { return localImages }
         
         return try await withThrowingTaskGroup(of: [DatabaseImage].self, returning: [DatabaseImage].self) { group in
             group.addTask(priority: .userInitiated) {
-                return try await dowloadImagesToLocalSystem(uid: uid, imagesType: .trigger)
-                    .compactMap( { UIImage(fromURL: $0) } )
-                    .map({ DatabaseImage(image: $0, imageType: .trigger) })
+                let downloadedResult =  try await dowloadImagesToLocalSystem(uid: uid, imagesType: .trigger)
+                let mappedResult = downloadedResult.compactMap( { UIImage(fromURL: $0) } )
+                let mappedResult1 =  mappedResult.map({ DatabaseImage(withImage: $0, imageType: .trigger) })
+                
+                return mappedResult1
             }
             group.addTask(priority: .userInitiated) {
-                return try await dowloadImagesToLocalSystem(uid: uid, imagesType: .media)
-                    .compactMap( { UIImage(fromURL: $0) })
-                    .map({ DatabaseImage(image: $0, imageType: .media) })
+                let downloadedResult =  try await dowloadImagesToLocalSystem(uid: uid, imagesType: .media)
+                let mappedResult = downloadedResult.compactMap( { UIImage(fromURL: $0) } )
+                let mappedResult1 =  mappedResult.map({ DatabaseImage(withImage: $0, imageType: .media) })
+                
+                return mappedResult1
             }
             
             var result = [DatabaseImage]()
@@ -65,10 +70,10 @@ struct DatabaseProvider {
         
         async let localTriggerImages = getLocalImagesURL(uid: uid, imagesType: .trigger)
             .compactMap({ UIImage(fromURL: $0) })
-            .map({ DatabaseImage(image: $0, imageType: .trigger) })
+            .map({ DatabaseImage(withImage: $0, imageType: .trigger) })
         async let localMediaImages   = getLocalImagesURL(uid: uid, imagesType: .media)
             .compactMap({ UIImage(fromURL: $0) })
-            .map({ DatabaseImage(image: $0, imageType: .media) })
+            .map({ DatabaseImage(withImage: $0, imageType: .media) })
         
         await localImages.append(contentsOf: localTriggerImages)
         await localImages.append(contentsOf: localMediaImages)
@@ -105,10 +110,14 @@ struct DatabaseProvider {
         
         for currentRef in photoRef {
             let fileURL = dir.appendingPathComponent(uid + (imagesType == .trigger ? "_trigger" : "_media"))
-            currentRef.write(toFile: fileURL) { url, error in
-                guard let url = url else { return }
-                localURLs.append(url)
-            }
+            // TODO: проблема тут!
+    //            currentRef.write(toFile: fileURL) { url, error in
+    //                guard let url = url else { return }
+    //                localURLs.append(url)
+    //            }
+            let currentLocalFile = try await currentRef.writeAsync(toFile: fileURL)
+            
+            if currentLocalFile != nil { localURLs.append(currentLocalFile!) }
         }
         
         return localURLs
@@ -130,5 +139,17 @@ extension UIImage {
         }
         
         self.init(data: data)
+    }
+}
+
+
+extension StorageReference {
+    func writeAsync(toFile fileURL: URL) async throws -> URL? {
+        try await withCheckedThrowingContinuation { continuation in
+            write(toFile: fileURL) { url, error in
+                if error != nil { continuation.resume(throwing: error!) }
+                continuation.resume(returning: url)
+            }
+        }
     }
 }

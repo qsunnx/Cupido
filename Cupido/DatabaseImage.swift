@@ -11,8 +11,11 @@ import UIKit
 struct DatabaseImage {
     var image: UIImage
     var imageType: ImageType
+    
+    init(withImage _image: UIImage, imageType _type: ImageType) {
+        image = _image
+        imageType = _type
+    }
 }
 
-extension DatabaseImage: Equatable {
-    
-}
+extension DatabaseImage: Equatable {}
