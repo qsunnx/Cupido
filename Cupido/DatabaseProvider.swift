@@ -87,7 +87,9 @@ struct DatabaseProvider {
         
         guard let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else { return localImages }
         guard let contentDir = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: []) else { return localImages }
-        localImages.append(contentsOf:contentDir.filter{ $0.lastPathComponent == uid + (imagesType == .trigger ? "_trigger" : "_media") } )
+        localImages.append(contentsOf:contentDir.filter{
+            $0.lastPathComponent.hasPrefix( imagesType == .trigger ? "trigger_" : "media_" )
+        } )
         
         return localImages
     }
@@ -108,13 +110,9 @@ struct DatabaseProvider {
         
         var localURLs = [URL]()
         
+        // TODO: для параллельности здесь сделать таск!
         for currentRef in photoRef {
-            let fileURL = dir.appendingPathComponent(uid + (imagesType == .trigger ? "_trigger" : "_media"))
-            // TODO: проблема тут!
-    //            currentRef.write(toFile: fileURL) { url, error in
-    //                guard let url = url else { return }
-    //                localURLs.append(url)
-    //            }
+            let fileURL = dir.appendingPathComponent((imagesType == .trigger ? "trigger_" : "media_") + currentRef.name)
             let currentLocalFile = try await currentRef.writeAsync(toFile: fileURL)
             
             if currentLocalFile != nil { localURLs.append(currentLocalFile!) }

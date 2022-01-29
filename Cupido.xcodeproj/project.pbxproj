@@ -14,7 +14,6 @@
 		7A4C46C926E22F33003C0E72 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4C46C826E22F33003C0E72 /* LoginViewController.swift */; };
 		7A4C46CB26E23E09003C0E72 /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4C46CA26E23E09003C0E72 /* SignUpViewController.swift */; };
 		7A4C46CD26E25381003C0E72 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7A4C46CC26E25381003C0E72 /* GoogleService-Info.plist */; };
-		7A8D1F9327024AAC000BD9BF /* QRCodeScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A8D1F9227024AAC000BD9BF /* QRCodeScannerViewController.swift */; };
 		7AC2E11E26BC7647002439A5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC2E11D26BC7647002439A5 /* AppDelegate.swift */; };
 		7AC2E12226BC7647002439A5 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AC2E12126BC7647002439A5 /* ViewController.swift */; };
 		7AC2E12526BC7647002439A5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7AC2E12326BC7647002439A5 /* Main.storyboard */; };
@@ -29,7 +28,6 @@
 		7A4C46C826E22F33003C0E72 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		7A4C46CA26E23E09003C0E72 /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		7A4C46CC26E25381003C0E72 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		7A8D1F9227024AAC000BD9BF /* QRCodeScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeScannerViewController.swift; sourceTree = "<group>"; };
 		7AC2E11A26BC7647002439A5 /* Cupido.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Cupido.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7AC2E11D26BC7647002439A5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AC2E12126BC7647002439A5 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -82,7 +80,6 @@
 				7AC9CC50277CE84300751A67 /* ImageType.swift */,
 				7A4C46C826E22F33003C0E72 /* LoginViewController.swift */,
 				7A4C46CA26E23E09003C0E72 /* SignUpViewController.swift */,
-				7A8D1F9227024AAC000BD9BF /* QRCodeScannerViewController.swift */,
 				7AC2E12126BC7647002439A5 /* ViewController.swift */,
 				7AC2E11D26BC7647002439A5 /* AppDelegate.swift */,
 				7AC2E12326BC7647002439A5 /* Main.storyboard */,
@@ -180,7 +177,6 @@
 				7AC9CC51277CE84300751A67 /* ImageType.swift in Sources */,
 				7AC2E11E26BC7647002439A5 /* AppDelegate.swift in Sources */,
 				7AC9CC53277CE87000751A67 /* DatabaseImage.swift in Sources */,
-				7A8D1F9327024AAC000BD9BF /* QRCodeScannerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

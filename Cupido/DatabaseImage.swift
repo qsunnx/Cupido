@@ -13,9 +13,22 @@ struct DatabaseImage {
     var imageType: ImageType
     
     init(withImage _image: UIImage, imageType _type: ImageType) {
-        image = _image
+        image = _image.rotatedDownImage()
         imageType = _type
+        
+        print(image.imageOrientation.rawValue.description)
     }
 }
 
 extension DatabaseImage: Equatable {}
+
+extension UIImage {
+    func rotatedDownImage() -> UIImage {        
+        switch self.imageOrientation {
+        case .down:
+            return self
+        default:
+            return UIImage(cgImage: self.cgImage!, scale: 1.0, orientation: .down)
+        }
+    }
+}

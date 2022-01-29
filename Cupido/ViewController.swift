@@ -13,21 +13,17 @@ import Foundation
 class ViewController: UIViewController {
     
     @IBOutlet var sceneView: ARSCNView!
-    @IBOutlet var nextButton: UIButton!
     
     private var captureSession: AVCaptureSession!
     private var previewLayer: AVCaptureVideoPreviewLayer!
     private let databaseProvider = DatabaseProvider()
     private let configuration = ARImageTrackingConfiguration()
-    private var databaseImages: [DatabaseImage] = [DatabaseImage]()
-    private var animationImages = [UIImage]()
-    private var mediaImageView = UIImageView()
+    @MainActor private var databaseImages: [DatabaseImage] = [DatabaseImage]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         captureSession = AVCaptureSession()
-        mediaImageView.animationDuration = 1.0
         
         
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
@@ -69,16 +65,9 @@ class ViewController: UIViewController {
         
         captureSession.startRunning()
         
-        // Set the view's delegate
         sceneView.delegate = self
         
-        // Show statistics such as fps and timing information
-        sceneView.showsStatistics = true
-        
-        // Create a new scene
         let scene = SCNScene()
-        
-        // Set the scene to the view
         sceneView.scene = scene
     }
     
@@ -90,10 +79,6 @@ class ViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         sceneView.session.pause()
-        mediaImageView.stopAnimating()
-    }
-    
-    @IBAction func nextButtonPressed(_ sender: Any) {
     }
 }
 
@@ -134,25 +119,20 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
         let planeNode = SCNNode(geometry: plane)
         planeNode.eulerAngles.x = -.pi / 2
         
+        let mediaImages = databaseImages.filter({ $0.imageType == .media })
+        var animateActions = [SCNAction]()
         
-        let material = SCNMaterial()
-        material.isDoubleSided = true
-        
-        DispatchQueue.main.async {
-            let imageView = UIImageView(image: UIImage(named: "TestImage")!)
-            material.diffuse.contents = imageView
-            planeNode.geometry?.materials = [material]
-            let action1 = SCNAction.scale(by: 2.0, duration: 1.0)
-            let action2 = SCNAction.run({ node in
-                let material = SCNMaterial()
-                material.isDoubleSided = true
-                let imageView = UIImageView(image: UIImage(named: "TestImage2")!)
-                material.diffuse.contents = imageView
-                node.geometry?.materials = [material]
-            }, queue: .main)
-            let action = SCNAction.sequence([action1, SCNAction.wait(duration: 1.0), action2])
-            planeNode.runAction(action)
+        for mediaImage in mediaImages {
+            // TODO: retain cycle!
+            let action = SCNAction.run { $0.geometry?.firstMaterial?.diffuse.contents = mediaImage.image }
+            animateActions.append(action)
+            animateActions.append(SCNAction.wait(duration: 10.0))
         }
+        
+        animateActions.append( SCNAction.run({ node in node.geometry?.firstMaterial?.diffuse.contents = self.databaseImages.first }) )
+        
+        let infiniteAction = SCNAction.repeatForever(SCNAction.sequence(animateActions))
+        planeNode.runAction(infiniteAction)
         
         let node = SCNNode()
         node.addChildNode(planeNode)
@@ -168,25 +148,28 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
             
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             
+            // TODO: затестить фриз экрана с диспатчем
+            
             Task {
                 do {
-                    let _databaseImages = try await databaseProvider.getDatabaseImages(uid: uid)
-                    databaseImages = _databaseImages
+                    let _databaseImages = try await self.databaseProvider.getDatabaseImages(uid: uid)
+                    self.databaseImages = _databaseImages
                 } catch {
                     // TODO: сообщение об ошибке
                 }
                 
-                let referenceImages = databaseImages
+                let referenceImages = self.databaseImages
                     .filter({ $0.imageType == .trigger })
-                    .map({ ARReferenceImage($0.image.cgImage!, orientation: .up, physicalWidth: 0.1) })
+                    .map({ ARReferenceImage($0.image.cgImage!, orientation: .down, physicalWidth: 0.2) })
                 var ARtriggerImages = Set<ARReferenceImage>()
                 
                 for referenceImage in referenceImages {
                     ARtriggerImages.insert(referenceImage)
                 }
                 
-                startRender(trackingImages: ARtriggerImages)
+                self.startRender(trackingImages: ARtriggerImages)
             }
         }
     }
 }
+
