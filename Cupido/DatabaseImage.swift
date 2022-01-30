@@ -14,13 +14,10 @@ struct DatabaseImage {
     
     init(withImage _image: UIImage, imageType _type: ImageType) {
         image = _image.rotatedDownImage()
+//        if _type == .media { image = image.imageWithSize(newSize: ImageProperties.Size()) }
         imageType = _type
-        
-        print(image.imageOrientation.rawValue.description)
     }
 }
-
-extension DatabaseImage: Equatable {}
 
 extension UIImage {
     func rotatedDownImage() -> UIImage {        
@@ -30,5 +27,12 @@ extension UIImage {
         default:
             return UIImage(cgImage: self.cgImage!, scale: 1.0, orientation: .down)
         }
+    }
+    
+    func imageWithSize(newSize: CGSize) -> UIImage {
+        let image = UIGraphicsImageRenderer(size: newSize).image { _ in
+            draw(in: CGRect(origin: .zero, size: newSize))
+        }
+        return image.withRenderingMode(renderingMode)
     }
 }

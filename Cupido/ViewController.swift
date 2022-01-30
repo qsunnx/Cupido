@@ -19,9 +19,19 @@ class ViewController: UIViewController {
     private let databaseProvider = DatabaseProvider()
     private let configuration = ARImageTrackingConfiguration()
     @MainActor private var databaseImages: [DatabaseImage] = [DatabaseImage]()
+    private let activityIndicatorView = UIActivityIndicatorView(style: .large)
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        activityIndicatorView.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicatorView.hidesWhenStopped = true
+        view.addSubview(activityIndicatorView)
+        
+        NSLayoutConstraint.activate([
+            activityIndicatorView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicatorView.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
         
         captureSession = AVCaptureSession()
         
@@ -83,7 +93,12 @@ class ViewController: UIViewController {
 }
 
 extension ViewController {
-   @MainActor private func startRender(trackingImages: Set<ARReferenceImage>) {
+    @MainActor private func startRender(trackingImages: Set<ARReferenceImage>) {
+        
+        DispatchQueue.main.async { [weak self] in
+            self?.activityIndicatorView.startAnimating()
+        }
+        
         self.configuration.trackingImages = trackingImages
         self.previewLayer.removeFromSuperlayer()
         self.sceneView.session.run(self.configuration, options: [.resetTracking, .removeExistingAnchors])
@@ -119,17 +134,29 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
         let planeNode = SCNNode(geometry: plane)
         planeNode.eulerAngles.x = -.pi / 2
         
+#if LOCAL
+        let mediaImages = [UIImage(named: "TestImage"),
+                           UIImage(named: "TestImage2"),
+                           UIImage(named: "TestImage3"),
+                           UIImage(named: "TestImage4")
+        ]
+#else
         let mediaImages = databaseImages.filter({ $0.imageType == .media })
+#endif
+        
         var animateActions = [SCNAction]()
         
         for mediaImage in mediaImages {
             // TODO: retain cycle!
+#if LOCAL
+            let action = SCNAction.run { $0.geometry?.firstMaterial?.diffuse.contents = mediaImage }
+#else
             let action = SCNAction.run { $0.geometry?.firstMaterial?.diffuse.contents = mediaImage.image }
+#endif
+            
             animateActions.append(action)
             animateActions.append(SCNAction.wait(duration: 10.0))
         }
-        
-        animateActions.append( SCNAction.run({ node in node.geometry?.firstMaterial?.diffuse.contents = self.databaseImages.first }) )
         
         let infiniteAction = SCNAction.repeatForever(SCNAction.sequence(animateActions))
         planeNode.runAction(infiniteAction)
@@ -148,6 +175,9 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
             
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             
+            DispatchQueue.main.async { [weak self] in
+                self?.activityIndicatorView.startAnimating()
+            }
             // TODO: затестить фриз экрана с диспатчем
             
             Task {
@@ -158,10 +188,11 @@ extension ViewController: AVCaptureMetadataOutputObjectsDelegate, ARSCNViewDeleg
                     // TODO: сообщение об ошибке
                 }
                 
+                var ARtriggerImages = Set<ARReferenceImage>()
+                
                 let referenceImages = self.databaseImages
                     .filter({ $0.imageType == .trigger })
-                    .map({ ARReferenceImage($0.image.cgImage!, orientation: .down, physicalWidth: 0.2) })
-                var ARtriggerImages = Set<ARReferenceImage>()
+                    .map({ ARReferenceImage($0.image.cgImage!, orientation: .up, physicalWidth: 0.2) })
                 
                 for referenceImage in referenceImages {
                     ARtriggerImages.insert(referenceImage)

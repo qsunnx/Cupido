@@ -95,6 +95,10 @@ struct DatabaseProvider {
     }
     
     private func dowloadImagesToLocalSystem(uid: String, imagesType: ImageType) async throws-> [URL] {
+        #if DEBUG
+        print("dowloadImagesToLocalSystem running on main thread? - " + Thread.current.isMainThread.description)
+        #endif
+        
         guard let dir = localDocumentsDirectory else { throw DownloadError.documentDirectoryNotFound }
         
         let storage = Storage.storage()
@@ -108,17 +112,26 @@ struct DatabaseProvider {
             photoRef.append(contentsOf: userFiles.items)
         }
         
-        var localURLs = [URL]()
-        
-        // TODO: для параллельности здесь сделать таск!
-        for currentRef in photoRef {
-            let fileURL = dir.appendingPathComponent((imagesType == .trigger ? "trigger_" : "media_") + currentRef.name)
-            let currentLocalFile = try await currentRef.writeAsync(toFile: fileURL)
+        return try await withThrowingTaskGroup(of: URL?.self, returning: [URL].self) {
+            group in
             
-            if currentLocalFile != nil { localURLs.append(currentLocalFile!) }
+            for currentRef in photoRef {
+                group.addTask(priority: .userInitiated) {
+                    let fileURL = dir.appendingPathComponent((imagesType == .trigger ? "trigger_" : "media_") + currentRef.name)
+                    let currentLocalFile = try await currentRef.writeAsync(toFile: fileURL)
+                    
+                    return currentLocalFile
+                }
+            }
+            
+            var localURLs = [URL]()
+            
+            for try await url in group {
+                if url != nil { localURLs.append(url!) }
+            }
+            
+            return localURLs
         }
-        
-        return localURLs
     }
 }
 
@@ -142,7 +155,7 @@ extension UIImage {
 
 
 extension StorageReference {
-    func writeAsync(toFile fileURL: URL) async throws -> URL? {
+    func writeAsync(toFile fileURL: URL) async throws -> URL? {        
         try await withCheckedThrowingContinuation { continuation in
             write(toFile: fileURL) { url, error in
                 if error != nil { continuation.resume(throwing: error!) }
